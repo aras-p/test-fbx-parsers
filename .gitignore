@@ -1,0 +1,6 @@
+/build
+.DS_Store
+/*.fbx
+/.vs
+/out
+external/fbxsdk

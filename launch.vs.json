@@ -1,0 +1,17 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "default",
+      "project": "CMakeLists.txt",
+      "projectTarget": "test_fbxsdk.exe",
+      "name": "test_fbxsdk.exe",
+      "currentDir": "${workspaceRoot}",
+      "args": [
+        // "bl_cube.fbx"
+        "MEASURE_ONE.fbx"
+      ]
+    }
+  ]
+}
