@@ -10,7 +10,20 @@
       "currentDir": "${workspaceRoot}",
       "args": [
         // "bl_cube.fbx"
-        "MEASURE_ONE.fbx"
+        //"MEASURE_ONE.fbx"
+        "rain_restaurant_bl43.fbx"
+      ]
+    },
+    {
+      "type": "default",
+      "project": "CMakeLists.txt",
+      "projectTarget": "test_ufbx.exe",
+      "name": "test_ufbx.exe",
+      "currentDir": "${workspaceRoot}",
+      "args": [
+        // "bl_cube.fbx"
+        //"MEASURE_ONE.fbx"
+        "rain_restaurant_bl43.fbx"
       ]
     }
   ]
