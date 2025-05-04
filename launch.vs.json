@@ -9,9 +9,11 @@
       "name": "test_fbxsdk.exe",
       "currentDir": "${workspaceRoot}",
       "args": [
-        // "bl_cube.fbx"
-        //"MEASURE_ONE.fbx"
-        "rain_restaurant_bl43.fbx"
+        "MEASURE_ONE.fbx",
+        "rain_restaurant_bl43.fbx",
+        "atvi_caldera_from_usd_bl45.fbx",
+        "intel_moore_lane_exported_from_usd_bl45.fbx",
+        "blender30splash_noanim_bl43.fbx"
       ]
     },
     {
@@ -21,9 +23,11 @@
       "name": "test_ufbx.exe",
       "currentDir": "${workspaceRoot}",
       "args": [
-        // "bl_cube.fbx"
-        //"MEASURE_ONE.fbx"
-        "rain_restaurant_bl43.fbx"
+        "MEASURE_ONE.fbx",
+        "rain_restaurant_bl43.fbx",
+        "atvi_caldera_from_usd_bl45.fbx",
+        "intel_moore_lane_exported_from_usd_bl45.fbx",
+        "blender30splash_noanim_bl43.fbx"
       ]
     }
   ]
