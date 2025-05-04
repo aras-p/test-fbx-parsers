@@ -45,4 +45,14 @@ project ("test_ufbx")
 add_executable (test_ufbx main_ufbx.cpp external/ufbx/ufbx.c external/ufbx/ufbx.h)
 set_property(TARGET test_ufbx PROPERTY CXX_STANDARD 17)
 set_property(TARGET test_ufbx PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-target_compile_definitions(test_ufbx PRIVATE CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_WARNINGS NOMINMAX)
+target_compile_definitions(test_ufbx PRIVATE CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_WARNINGS NOMINMAX
+    UFBX_NO_SUBDIVISION
+    UFBX_NO_TESSELLATION
+    UFBX_NO_GEOMETRY_CACHE
+    UFBX_NO_SCENE_EVALUATION
+    UFBX_NO_SKINNING_EVALUATION
+    UFBX_NO_ANIMATION_BAKING
+    UFBX_NO_TRIANGULATION
+    UFBX_NO_INDEX_GENERATION
+    UFBX_NO_FORMAT_OBJ
+)
