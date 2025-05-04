@@ -19,6 +19,20 @@
     {
       "type": "default",
       "project": "CMakeLists.txt",
+      "projectTarget": "test_openfbx.exe",
+      "name": "test_openfbx.exe",
+      "currentDir": "${workspaceRoot}",
+      "args": [
+        "MEASURE_ONE.fbx",
+        "rain_restaurant_bl43.fbx",
+        "atvi_caldera_from_usd_bl45.fbx",
+        "intel_moore_lane_exported_from_usd_bl45.fbx",
+        "blender30splash_noanim_bl43.fbx"
+      ]
+    },
+    {
+      "type": "default",
+      "project": "CMakeLists.txt",
       "projectTarget": "test_ufbx.exe",
       "name": "test_ufbx.exe",
       "currentDir": "${workspaceRoot}",

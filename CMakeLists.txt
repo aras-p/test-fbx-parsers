@@ -41,6 +41,12 @@ set_property(TARGET test_fbxsdk PROPERTY CXX_STANDARD 17)
 set_property(TARGET test_fbxsdk PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 target_compile_definitions(test_fbxsdk PRIVATE CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_WARNINGS NOMINMAX)
 
+project ("test_openfbx")
+add_executable (test_openfbx main_openfbx.cpp external/OpenFBX/libdeflate.c external/OpenFBX/ofbx.cpp)
+set_property(TARGET test_openfbx PROPERTY CXX_STANDARD 17)
+set_property(TARGET test_openfbx PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+target_compile_definitions(test_openfbx PRIVATE CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_WARNINGS NOMINMAX)
+
 project ("test_ufbx")
 add_executable (test_ufbx main_ufbx.cpp external/ufbx/ufbx.c external/ufbx/ufbx.h)
 set_property(TARGET test_ufbx PROPERTY CXX_STANDARD 17)
