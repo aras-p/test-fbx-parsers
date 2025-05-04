@@ -1,55 +1,51 @@
-#include "external/ufbx/ufbx.h"
-#include <chrono>
 #include <vector>
+#include "common.h"
+
+#include "external/ufbx/ufbx.h"
+
+#define IMPORT_FILES_IN_PARALLEL
+
+#if defined(IMPORT_FILES_IN_PARALLEL)
 #include <execution>
+#endif
 
-/*
-test_fbxsdk.exe 477 KB
+#define USE_UFBX_THREADS
+#if defined(USE_UFBX_THREADS)
+#define UFBX_OS_IMPLEMENTATION
+#include "external/ufbx/ufbx_os.h"
+static ufbx_os_thread_pool* g_thread_pool;
+#endif
 
-Loading MEASURE_ONE.fbx...
-Loaded in 1298.2 ms
-Meshes: 7293 (3053.2 Kverts, 5732.4 Kfaces)
-Lights: 0
-Cameras: 1
-Skeletons: 0
-
-Loading rain_restaurant_bl43.fbx...
-Loaded in 1166.6 ms
-Meshes: 93 (62.6 Kverts, 59.3 Kfaces)
-Lights: 7
-Cameras: 1
-Skeletons: 3495
-
-Loading 5 input files in parallel:
-- 'MEASURE_ONE.fbx'
-- 'rain_restaurant_bl43.fbx'
-- 'atvi_caldera_from_usd_bl45.fbx'
-- 'intel_moore_lane_exported_from_usd_bl45.fbx'
-- 'blender30splash_noanim_bl43.fbx'
-Done in 2563.9 ms
-- 'MEASURE_ONE.fbx' in 1426.9 ms
-  - 7293 meshes (3053.2 Kverts, 5732.4 Kfaces), 0 lights, 1 cameras, 0 bones
-- 'rain_restaurant_bl43.fbx' in 1193.1 ms
-  - 93 meshes (62.6 Kverts, 59.3 Kfaces), 7 lights, 1 cameras, 3495 bones
-- 'atvi_caldera_from_usd_bl45.fbx' in 2234.6 ms
-  - 4371 meshes (9751.9 Kverts, 16740.1 Kfaces), 0 lights, 13 cameras, 113 bones
-- 'intel_moore_lane_exported_from_usd_bl45.fbx' in 2532.9 ms
-  - 605 meshes (10090.7 Kverts, 10286.1 Kfaces), 51 lights, 1 cameras, 0 bones
-- 'blender30splash_noanim_bl43.fbx' in 1407.4 ms
-  - 431 meshes (2162.6 Kverts, 2090.9 Kfaces), 6 lights, 1 cameras, 4121 bones
-*/
-
-struct Stats
+static void process_file(Stats& entry)
 {
-    const char* path = nullptr;
-    float ms = 0;
-    size_t meshes = 0;
-    size_t lights = 0;
-    size_t cameras = 0;
-    size_t skeletons = 0;
-    size_t vertices = 0;
-    size_t faces = 0;
-};
+    auto t0 = time_now();
+
+    // Load the file
+    ufbx_load_opts opts = {};
+#if defined(USE_UFBX_THREADS)
+    ufbx_os_init_ufbx_thread_pool(&opts.thread_opts.pool, g_thread_pool);
+#endif
+
+    ufbx_error error = {};
+    ufbx_scene* scene = ufbx_load_file(entry.path, &opts, &error);
+    if (scene == nullptr) {
+        printf("ERROR: failed to load fbx %s\n", entry.path);
+        exit(1);
+    }
+
+    // Gather some basic stats about the scene
+    entry.meshes = scene->meshes.count;
+    entry.cameras = scene->cameras.count;
+    entry.lights = scene->lights.count;
+    entry.bones = scene->bones.count;
+    for (const ufbx_mesh* mesh : scene->meshes) {
+        entry.vertices += mesh->num_vertices;
+        entry.faces += mesh->num_faces;
+    }
+    ufbx_free_scene(scene);
+
+    entry.ms = time_duration_ms(t0);
+}
 
 int main(int argc, char** argv)
 {
@@ -67,43 +63,24 @@ int main(int argc, char** argv)
     }
 
     // Process the files
-    auto t0 = std::chrono::high_resolution_clock::now();
-    std::for_each(std::execution::par, stats.begin(), stats.end(),
-        [](Stats& stats) {
-            auto ft0 = std::chrono::high_resolution_clock::now();
+    auto t0 = time_now();
 
-            // Load the file
-            ufbx_load_opts opts = {};
-            ufbx_error error = {};
-            ufbx_scene* scene = ufbx_load_file(stats.path, &opts, &error);
-            if (scene == nullptr) {
-                printf("ERROR: failed to load fbx %s\n", stats.path);
-                exit(1);
-            }
-
-            auto ft1 = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<float, std::milli> fdt = ft1 - ft0;
-            stats.ms = fdt.count();
-
-            // Gather some basic stats about the scene
-            stats.meshes = scene->meshes.count;
-            stats.cameras = scene->cameras.count;
-            stats.lights = scene->lights.count;
-            stats.skeletons = scene->bones.count;
-            for (const ufbx_mesh* mesh : scene->meshes) {
-                stats.vertices += mesh->num_vertices;
-                stats.faces += mesh->num_faces;
-            }
-            ufbx_free_scene(scene);
-        });
-    auto t1 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<float, std::milli> dt = t1 - t0;
-    printf("Done in %.1f ms\n", dt.count());
-    for (const Stats& st : stats)
+#if defined(USE_UFBX_THREADS)
     {
-        printf("- '%s' in %.1f ms\n", st.path, st.ms);
-        printf("  - %zi meshes (%.1f Kverts, %.1f Kfaces), %zi lights, %zi cameras, %zi bones\n", st.meshes, st.vertices / 1024.0, st.faces / 1024.0, st.lights, st.cameras, st.skeletons);
+        ufbx_os_thread_pool_opts pool_opts = { 0 };
+        pool_opts.max_threads = 4;
+        g_thread_pool = ufbx_os_create_thread_pool(&pool_opts);
     }
+#endif
 
+#if defined(IMPORT_FILES_IN_PARALLEL)
+    std::for_each(std::execution::par, stats.begin(), stats.end(), [](Stats& st) { process_file(st); });
+#else
+    for (Stats& st : stats) { process_file(st); }
+#endif
+    float dt = time_duration_ms(t0);
+    printf("Done in %.1f s\n", dt / 1000.0);
+    Stats sum_stats = aggregate_stats(stats.size(), stats.data());
+    print_sum_stats(sum_stats);
     return 0;
 }

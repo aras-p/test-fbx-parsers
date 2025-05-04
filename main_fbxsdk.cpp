@@ -1,46 +1,25 @@
 #include <fbxsdk.h>
-#include <chrono>
 #include <vector>
+#include "common.h"
+#include <unordered_set>
 
-
-/*
-test_fbxsdk.exe 4505 KB
-
-Loading MEASURE_ONE.fbx...
-Loaded in 3606.8 ms
-Meshes: 7293 (3053.2 Kverts, 5732.4 Kfaces)
-Lights: 0
-Cameras: 1
-Skeletons: 0
-
-Loading rain_restaurant_bl43.fbx...
-Loaded in 11716.8 ms
-Meshes: 93 (62.6 Kverts, 59.3 Kfaces)
-Lights: 8
-Cameras: 1
-Skeletons: 3495
-*/
-
-struct Stats
+struct WalkState
 {
-    const char* path = nullptr;
-    float ms = 0;
-    size_t meshes = 0;
-    size_t lights = 0;
-    size_t cameras = 0;
-    size_t skeletons = 0;
-    size_t vertices = 0;
-    size_t faces = 0;
+    std::unordered_set<const FbxNodeAttribute*> seen_nodes;
 };
 
-static void walk_attribute(FbxNodeAttribute* attr, Stats& r_stats)
+static void walk_attribute(FbxNodeAttribute* attr, Stats& r_stats, WalkState& state)
 {
     if (!attr)
         return;
+    if (!state.seen_nodes.insert(attr).second)
+        return; // this node already included in stats (happens with instancing)
 
-    switch (attr->GetAttributeType()) {
+
+    switch (attr->GetAttributeType())
+    {
     case FbxNodeAttribute::eSkeleton:
-        r_stats.skeletons++;
+        r_stats.bones++;
         break;
     case FbxNodeAttribute::eMesh:
         r_stats.meshes++;
@@ -55,24 +34,24 @@ static void walk_attribute(FbxNodeAttribute* attr, Stats& r_stats)
         break;
     case FbxNodeAttribute::eLight:
         r_stats.lights++;
-        printf("Light %s\n", attr->GetName());
         break;
     }
 }
 
-static void walk_node(FbxNode* node, Stats &r_stats)
+static void walk_node(FbxNode* node, Stats &r_stats, WalkState &state)
 {
     if (!node)
         return;
     for (int i = 0, n = node->GetNodeAttributeCount(); i != n; i++)
-        walk_attribute(node->GetNodeAttributeByIndex(i), r_stats);
+        walk_attribute(node->GetNodeAttributeByIndex(i), r_stats, state);
     for (int i = 0, n = node->GetChildCount(); i != n; i++)
-        walk_node(node->GetChild(i), r_stats);
+        walk_node(node->GetChild(i), r_stats, state);
 }
 
 int main(int argc, char** argv)
 {
-    if (argc < 2) {
+    if (argc < 2)
+    {
         printf("Usage: pass input FBX files on the command line\n");
         return 1;
     }
@@ -90,10 +69,10 @@ int main(int argc, char** argv)
     // by having each thread create its own FbxManager. But somewhere deep within
     // FBX SDK, it does use some global/shared state even with separate FbxManagers,
     // and you will get random crashes :(
-    auto t0 = std::chrono::high_resolution_clock::now();
+    auto t0 = time_now();
     for (Stats& st : stats)
     {
-        auto ft0 = std::chrono::high_resolution_clock::now();
+        auto ft0 = time_now();
         // Create SDK manager, IO settings and a scene
         FbxManager* sdk = FbxManager::Create();
         FbxIOSettings* ios = FbxIOSettings::Create(sdk, IOSROOT);
@@ -110,24 +89,19 @@ int main(int argc, char** argv)
         importer->Import(scene);
         importer->Destroy();
 
-        auto ft1 = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<float, std::milli> fdt = ft1 - ft0;
-        st.ms = fdt.count();
-
         // Gather some basic stats about the scene
         FbxNode* root = scene->GetRootNode();
-        walk_node(root, st);
+        WalkState state;
+        walk_node(root, st, state);
         sdk->Destroy();
+
+        st.ms = time_duration_ms(ft0);
     };
 
-    auto t1 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<float, std::milli> dt = t1 - t0;
-    printf("Done in %.1f ms\n", dt.count());
-    for (const Stats& st : stats)
-    {
-        printf("- '%s' in %.1f ms\n", st.path, st.ms);
-        printf("  - %zi meshes (%.1f Kverts, %.1f Kfaces), %zi lights, %zi cameras, %zi bones\n", st.meshes, st.vertices / 1024.0, st.faces / 1024.0, st.lights, st.cameras, st.skeletons);
-    }
+    float dt = time_duration_ms(t0);
+    printf("Done in %.1f s\n", dt / 1000.0);
+    Stats sum_stats = aggregate_stats(stats.size(), stats.data());
+    print_sum_stats(sum_stats);
 
     return 0;
 }
