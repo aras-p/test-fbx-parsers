@@ -9,11 +9,15 @@
       "name": "test_fbxsdk.exe",
       "currentDir": "${workspaceRoot}",
       "args": [
-        "MEASURE_ONE.fbx",
-        "rain_restaurant_bl43.fbx",
-        "atvi_caldera_from_usd_bl45.fbx",
-        "intel_moore_lane_exported_from_usd_bl45.fbx",
-        "blender30splash_noanim_bl43.fbx"
+        "data/atvi_caldera_from_usd_bl45.fbx",
+        "data/BistroExterior.fbx",
+        "data/BistroInterior.fbx",
+        "data/BistroInterior_Wine.fbx",
+        "data/blender30splash_noanim_bl43.fbx",
+        "data/intel_moore_lane_exported_from_usd_bl45.fbx",
+        "data/MEASURE_ONE.fbx",
+        "data/rain_restaurant_bl43.fbx",
+        "data/splash3_ellie.fbx"
       ]
     },
     {
@@ -23,11 +27,33 @@
       "name": "test_openfbx.exe",
       "currentDir": "${workspaceRoot}",
       "args": [
-        "MEASURE_ONE.fbx",
-        "rain_restaurant_bl43.fbx",
-        "atvi_caldera_from_usd_bl45.fbx",
-        "intel_moore_lane_exported_from_usd_bl45.fbx",
-        "blender30splash_noanim_bl43.fbx"
+        "data/atvi_caldera_from_usd_bl45.fbx",
+        "data/BistroExterior.fbx",
+        "data/BistroInterior.fbx",
+        "data/BistroInterior_Wine.fbx",
+        "data/blender30splash_noanim_bl43.fbx",
+        "data/intel_moore_lane_exported_from_usd_bl45.fbx",
+        "data/MEASURE_ONE.fbx",
+        "data/rain_restaurant_bl43.fbx",
+        "data/splash3_ellie.fbx"
+      ]
+    },
+    {
+      "type": "default",
+      "project": "CMakeLists.txt",
+      "projectTarget": "test_assimp.exe",
+      "name": "test_assimp.exe",
+      "currentDir": "${workspaceRoot}",
+      "args": [
+        "data/atvi_caldera_from_usd_bl45.fbx",
+        "data/BistroExterior.fbx",
+        "data/BistroInterior.fbx",
+        "data/BistroInterior_Wine.fbx",
+        "data/blender30splash_noanim_bl43.fbx",
+        "data/intel_moore_lane_exported_from_usd_bl45.fbx",
+        "data/MEASURE_ONE.fbx",
+        "data/rain_restaurant_bl43.fbx",
+        "data/splash3_ellie.fbx"
       ]
     },
     {
@@ -37,11 +63,15 @@
       "name": "test_ufbx.exe",
       "currentDir": "${workspaceRoot}",
       "args": [
-        "MEASURE_ONE.fbx",
-        "rain_restaurant_bl43.fbx",
-        "atvi_caldera_from_usd_bl45.fbx",
-        "intel_moore_lane_exported_from_usd_bl45.fbx",
-        "blender30splash_noanim_bl43.fbx"
+        "data/atvi_caldera_from_usd_bl45.fbx",
+        "data/BistroExterior.fbx",
+        "data/BistroInterior.fbx",
+        "data/BistroInterior_Wine.fbx",
+        "data/blender30splash_noanim_bl43.fbx",
+        "data/intel_moore_lane_exported_from_usd_bl45.fbx",
+        "data/MEASURE_ONE.fbx",
+        "data/rain_restaurant_bl43.fbx",
+        "data/splash3_ellie.fbx"
       ]
     }
   ]

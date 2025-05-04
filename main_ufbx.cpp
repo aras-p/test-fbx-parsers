@@ -54,7 +54,7 @@ int main(int argc, char** argv)
         return 1;
     }
     const int input_file_count = argc - 1;
-    printf("Loading %i input files in parallel:\n", input_file_count);
+    printf("Loading %i input files:\n", input_file_count);
     std::vector<Stats> stats(input_file_count);
     for (int i = 0; i < input_file_count; i++)
     {
