@@ -2,8 +2,11 @@ cmake_minimum_required (VERSION 3.21)
 if(POLICY CMP0091)
     cmake_policy(SET CMP0091 NEW) # enable MSVC_RUNTIME_LIBRARY
 endif()
+if(POLICY CMP0135)
+	cmake_policy(SET CMP0135 NEW) # avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24+
+endif()
 
-# setup FBX SDK library bits
+# setup FBX SDK library
 add_library(fbxsdk STATIC IMPORTED GLOBAL)
 set(FBX_ROOT ${CMAKE_SOURCE_DIR}/external/fbxsdk)
 set_target_properties(fbxsdk PROPERTIES
@@ -33,6 +36,26 @@ target_link_libraries(fbxsdk INTERFACE zlib)
 target_link_libraries(fbxsdk INTERFACE libxml2)
 #
 
+# setup AssImp
+include(FetchContent)
+FetchContent_Declare(
+	assimp
+	URL https://github.com/assimp/assimp/archive/refs/tags/v5.4.3.zip # latest (2024 Aug) at time of writing
+)
+option(BUILD_SHARED_LIBS "Build shared libs" OFF)
+option(ASSIMP_NO_EXPORT "" OFF)
+option(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT "" OFF)
+option(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT "" OFF)
+option(ASSIMP_BUILD_ASSIMP_TOOLS "" OFF)
+option(ASSIMP_BUILD_TESTS "" OFF)
+option(ASSIMP_IGNORE_GIT_HASH "" ON)
+option(USE_STATIC_CRT "" ON)
+option(ASSIMP_INSTALL "" OFF)
+option(ASSIMP_BUILD_ASSIMP_VIEW "" OFF)
+option(ASSIMP_BUILD_FBX_IMPORTER "" ON)
+option(ASSIMP_BUILD_ZLIB "" ON)
+option(ASSIMP_BUILD_USE_CCACHE "" OFF)
+FetchContent_MakeAvailable(assimp)
 
 project ("test_fbxsdk")
 add_executable (test_fbxsdk main_fbxsdk.cpp)
@@ -46,6 +69,14 @@ add_executable (test_openfbx main_openfbx.cpp external/OpenFBX/libdeflate.c exte
 set_property(TARGET test_openfbx PROPERTY CXX_STANDARD 17)
 set_property(TARGET test_openfbx PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 target_compile_definitions(test_openfbx PRIVATE CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_WARNINGS NOMINMAX)
+
+project ("test_assimp")
+add_executable (test_assimp main_assimp.cpp)
+target_include_directories(test_assimp PRIVATE ${assimp_SOURCE_DIR}/include)
+target_link_libraries(test_assimp PRIVATE assimp::assimp)
+set_property(TARGET test_assimp PROPERTY CXX_STANDARD 17)
+set_property(TARGET test_assimp PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+target_compile_definitions(test_assimp PRIVATE CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_WARNINGS NOMINMAX)
 
 project ("test_ufbx")
 add_executable (test_ufbx main_ufbx.cpp external/ufbx/ufbx.c external/ufbx/ufbx.h)
