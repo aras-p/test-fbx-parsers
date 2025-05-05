@@ -23,10 +23,10 @@ bones are present, and the total sum of mesh vertices and faces. Nothing related
 | Parser                   | Time sequential, s | Time parallel, s | Executable size, KB |
 |--------------------------|------:|-------:|-----:|
 | ufbx                     |   9.8 |    2.7 |  457 |
-| ufbx w/ internal threads |   4.4 |    2.6 |  463 |
+| ufbx w/ internal threads |   4.4 |    2.6 |  462 |
 | FBX SDK                  | 869.9 | crash! | 4508 |
-| AssImp                   |  33.9 |   26.9 | 1058 |
-| OpenFBX                  |  26.7 |   15.9 |  316 |
+| AssImp                   |  33.9 |   26.7 | 1060 |
+| OpenFBX                  |  26.7 |   15.8 |  312 |
 
 Files being tested (not in the repo, but I've [uploaded them here](https://aras-p.info/files/blender/fbx_data/test_fbx_parsers/)): 
 - Caldera:  388MB file exported out of [Activision Caldera](https://github.com/Activision/caldera) USD data set.
@@ -56,6 +56,12 @@ random crashes deep from the innards of the SDK. Probably has some actually shar
 
 I have only built and tested this code on Windows, with Visual Studio 2022. Just do "Open with Visual Studio" on the folder; it goes into regular CMake
 project mode.
+
+#### Parallel file import
+
+An easy way to import several FBX files in parallel would be C++17 `<execution>` and doing `std::for_each` with `std::execution::par`. However,
+that is not available / implemented in Apple's Xcode/clang at this time. So instead I'm using a simple `ic_pfor.h` utility from Ignacio Castaño's
+[ICBC](https://github.com/castano/icbc) repository.
 
 #### ufbx build options
 

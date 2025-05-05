@@ -4,6 +4,8 @@ Any platform:
 - `include` folder with headers
 
 Windows:
+- lib/x64/debug and lib/x64/release folders,
+- libfbxsdk-mt.lib, libxml2-mt.lib, zlib-mt.lib files in each
 
 Mac:
 - lib/clang/debug/libfbxsdk.a

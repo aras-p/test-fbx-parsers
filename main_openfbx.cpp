@@ -6,7 +6,9 @@
 #define IMPORT_FILES_IN_PARALLEL
 
 #if defined(IMPORT_FILES_IN_PARALLEL)
-#include <execution>
+#define IC_PFOR_IMPLEMENTATION
+#define IC_INIT_THREAD_CRT 1
+#include "external/ic_pfor.h"
 #endif
 
 static void process_file(Stats& entry)
@@ -76,7 +78,9 @@ int main(int argc, char** argv)
     auto t0 = time_now();
 
 #if defined(IMPORT_FILES_IN_PARALLEL)
-    std::for_each(std::execution::par, stats.begin(), stats.end(), [](Stats& st) { process_file(st); });
+    ic::init_pfor(std::min(input_file_count, 32));
+    ic::pfor(input_file_count, 1, [&](int index) { process_file(stats[index]); });
+    ic::shut_pfor();
 #else
     for (Stats& st : stats) { process_file(st); }
 #endif
