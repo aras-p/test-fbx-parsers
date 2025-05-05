@@ -1,0 +1,10 @@
+The testing code expects FBX SDK to be here.
+
+Any platform:
+- `include` folder with headers
+
+Windows:
+
+Mac:
+- lib/clang/debug/libfbxsdk.a
+- lib/clang/release/libfbxsdk.a

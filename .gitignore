@@ -3,4 +3,5 @@
 /data/*.fbx
 /.vs
 /out
-external/fbxsdk
+external/fbxsdk/include
+external/fbxsdk/lib

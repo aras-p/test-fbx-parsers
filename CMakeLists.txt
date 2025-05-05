@@ -9,31 +9,41 @@ endif()
 # setup FBX SDK library
 add_library(fbxsdk STATIC IMPORTED GLOBAL)
 set(FBX_ROOT ${CMAKE_SOURCE_DIR}/external/fbxsdk)
-set_target_properties(fbxsdk PROPERTIES
-    IMPORTED_LOCATION ${FBX_ROOT}/lib/x64/release/libfbxsdk-mt.lib
-    IMPORTED_LOCATION_DEBUG ${FBX_ROOT}/lib/x64/debug/libfbxsdk-mt.lib
-    INTERFACE_INCLUDE_DIRECTORIES ${FBX_ROOT}/include
-    IMPORTED_IMPLIB ${FBX_ROOT}/lib/x64/release/libfbxsdk-mt.lib
-    IMPORTED_IMPLIB_DEBUG ${FBX_ROOT}/lib/x64/debug/libfbxsdk-mt.lib
-)
-add_library(libxml2 STATIC IMPORTED GLOBAL)
-set_target_properties(libxml2 PROPERTIES
-    IMPORTED_LOCATION ${FBX_ROOT}/lib/x64/release/libxml2-mt.lib
-    IMPORTED_LOCATION_DEBUG ${FBX_ROOT}/lib/x64/debug/libxml2-mt.lib
-    INTERFACE_INCLUDE_DIRECTORIES ${FBX_ROOT}/include/libxml2
-    IMPORTED_IMPLIB ${FBX_ROOT}/lib/x64/release/libxml2-mt.lib
-    IMPORTED_IMPLIB_DEBUG ${FBX_ROOT}/lib/x64/debug/libxml2-mt.lib
-)
-target_compile_definitions(libxml2 INTERFACE LIBXML_STATIC)    
-add_library(zlib STATIC IMPORTED GLOBAL)
-set_target_properties(zlib PROPERTIES
-    IMPORTED_LOCATION ${FBX_ROOT}/lib/x64/release/zlib-mt.lib
-    IMPORTED_LOCATION_DEBUG ${FBX_ROOT}/lib/x64/debug/zlib-mt.lib
-    IMPORTED_IMPLIB ${FBX_ROOT}/lib/x64/release/zlib-mt.lib
-    IMPORTED_IMPLIB_DEBUG ${FBX_ROOT}/lib/x64/debug/zlib-mt.lib
-)
-target_link_libraries(fbxsdk INTERFACE zlib)
-target_link_libraries(fbxsdk INTERFACE libxml2)
+if(WIN32)
+    set_target_properties(fbxsdk PROPERTIES
+        IMPORTED_LOCATION ${FBX_ROOT}/lib/x64/release/libfbxsdk-mt.lib
+        IMPORTED_LOCATION_DEBUG ${FBX_ROOT}/lib/x64/debug/libfbxsdk-mt.lib
+        INTERFACE_INCLUDE_DIRECTORIES ${FBX_ROOT}/include
+        IMPORTED_IMPLIB ${FBX_ROOT}/lib/x64/release/libfbxsdk-mt.lib
+        IMPORTED_IMPLIB_DEBUG ${FBX_ROOT}/lib/x64/debug/libfbxsdk-mt.lib
+    )
+    add_library(libxml2 STATIC IMPORTED GLOBAL)
+    set_target_properties(libxml2 PROPERTIES
+        IMPORTED_LOCATION ${FBX_ROOT}/lib/x64/release/libxml2-mt.lib
+        IMPORTED_LOCATION_DEBUG ${FBX_ROOT}/lib/x64/debug/libxml2-mt.lib
+        INTERFACE_INCLUDE_DIRECTORIES ${FBX_ROOT}/include/libxml2
+        IMPORTED_IMPLIB ${FBX_ROOT}/lib/x64/release/libxml2-mt.lib
+        IMPORTED_IMPLIB_DEBUG ${FBX_ROOT}/lib/x64/debug/libxml2-mt.lib
+    )
+    target_compile_definitions(libxml2 INTERFACE LIBXML_STATIC)    
+    add_library(zlib STATIC IMPORTED GLOBAL)
+    set_target_properties(zlib PROPERTIES
+        IMPORTED_LOCATION ${FBX_ROOT}/lib/x64/release/zlib-mt.lib
+        IMPORTED_LOCATION_DEBUG ${FBX_ROOT}/lib/x64/debug/zlib-mt.lib
+        IMPORTED_IMPLIB ${FBX_ROOT}/lib/x64/release/zlib-mt.lib
+        IMPORTED_IMPLIB_DEBUG ${FBX_ROOT}/lib/x64/debug/zlib-mt.lib
+    )
+    target_link_libraries(fbxsdk INTERFACE zlib libxml2)
+elseif(APPLE)
+    set_target_properties(fbxsdk PROPERTIES
+        IMPORTED_LOCATION ${FBX_ROOT}/lib/clang/release/libfbxsdk.a
+        IMPORTED_LOCATION_DEBUG ${FBX_ROOT}/lib/clang/debug/libfbxsdk.a
+        INTERFACE_INCLUDE_DIRECTORIES ${FBX_ROOT}/include
+    )
+    target_link_libraries(fbxsdk INTERFACE xml2 z iconv "-framework CoreFoundation")
+else()
+    message(FATAL_ERROR "Don't know how to setup FBX SDK on this platform")
+endif()
 #
 
 # setup AssImp
