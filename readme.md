@@ -1,9 +1,13 @@
 # Testing various Autodesk .FBX parsing libraries
 
+I was working on [new FBX importer for Blender 4.5](https://projects.blender.org/blender/blender/pulls/132406),
+and while that one is based on [ufbx](https://github.com/ufbx/ufbx) library, I wanted to do a quick
+comparison between various FBX format parsing libraries.
+
 ### Libraries
 
 * ufbx: https://github.com/ufbx/ufbx (v0.18.2, 2025 Apr, 5b5494b). MIT or Public Domain license.
-* FBX SDK: [Autodesk FBX SDK](https://aps.autodesk.com/developer/overview/fbx-sdk), 2020.3.7.
+* FBX SDK: [Autodesk FBX SDK](https://aps.autodesk.com/developer/overview/fbx-sdk), 2020.3.7. Proprietary license.
 * AssImp: https://github.com/assimp/assimp (5.4.3, 2024 Aug, c35200e). 3-clause BSD license.
 * OpenFBX: https://github.com/nem0/OpenFBX (2024 Dec, 82a43d9). MIT license.
 
@@ -13,6 +17,9 @@
 Importing 9 large-ish FBX files (total size 2GB), on Ryzen 5950X CPU (Windows 10, built with Visual Studio 2022 v17.13.1),
 in "Release" build configuration. See details on files below.
 
+What the test application does, is parse the input files, and does a _very basic_ "summary": how many meshes, lights, cameras,
+bones are present, and the total sum of mesh vertices and faces. Nothing related to animations is tested.
+
 | Parser                   | Time sequential, s | Time parallel, s | Executable size, KB |
 |--------------------------|------:|-------:|-----:|
 | ufbx                     |   9.8 |    2.7 |  457 |
@@ -21,7 +28,7 @@ in "Release" build configuration. See details on files below.
 | AssImp                   |  33.9 |   26.9 | 1058 |
 | OpenFBX                  |  26.7 |   15.9 |  316 |
 
-Files being tested (note that I am not including them into the repository due to repo size reasons): 
+Files being tested (not in the repo, but I've [uploaded them here](https://aras-p.info/files/blender/fbx_data/test_fbx_parsers/)): 
 - Caldera:  388MB file exported out of [Activision Caldera](https://github.com/Activision/caldera) USD data set.
 - Moore Lane: 502MB file exported out of [Intel Moore Lane](https://dpel.aswf.io/4004-moore-lane/) USD data set.
 - Rain Restaurant: 267MB file exported out of [Hi, my name is Amy](https://studio.blender.org/characters/rain/showcase/1/) Blender Studio character showcase. Complex character rig, lots of animation curves.
@@ -30,7 +37,25 @@ Files being tested (note that I am not including them into the repository due to
 - Measure One: 290MB file from [Beeple Zero Day](https://developer.nvidia.com/orca/beeple-zero-day) data set.
 - Bistro: three files (117MB, 41MB, 48MB) from [Amazon Lumberyard Bistro](https://developer.nvidia.com/orca/amazon-lumberyard-bistro) data set.
 
+### Summary
+
+`ufbx` seems to be overall winner in all aspects. It is written very cleanly, is trivial to build (just one source file),
+has good comments, is _very extensively_ tested, and is very fast.
+
+FBX SDK is... _not fast_, shall we say. Out of the files I tested, it seems to spend most of the time in _cleaning up_ after the import is done
+(in `sdk->Destroy()`), and that is pathologically bad performance in files that have lots of instancing. Feels like it does cleanup
+by removing objects and their relations one-by-one, de-registering the removed relations from all affected objects. Probably resulting in
+quadratic complexity in terms of relation/object count.
+
+It also can not be safetly multi-threaded, like if you want to parse multiple FBX files on their own threads. The SDK documentation is not very
+clear on this; it says that access to the same `FbxManager` from multiple threads is definitely not safe (fine!), and suggests that you
+_can_ create multiple `FbxManager` objects (fine!), but then if you try to use one of them per each imported file, in parallel, you get
+random crashes deep from the innards of the SDK. Probably has some actually shared / global data.
+
 ### Notes
+
+I have only built and tested this code on Windows, with Visual Studio 2022. Just do "Open with Visual Studio" on the folder; it goes into regular CMake
+project mode.
 
 #### ufbx build options
 
