@@ -35,6 +35,8 @@ static void walk_attribute(FbxNodeAttribute* attr, Stats& r_stats, WalkState& st
     case FbxNodeAttribute::eLight:
         r_stats.lights++;
         break;
+    default:
+        break;
     }
 }
 

@@ -14,11 +14,11 @@ comparison between various FBX format parsing libraries.
 
 ### Performance
 
-Importing 9 large-ish FBX files (total size 2GB), on Ryzen 5950X CPU (Windows 10, built with Visual Studio 2022 v17.13.1),
-in "Release" build configuration. See details on files below.
-
+Importing 9 large-ish FBX files (total size 2GB), in "Release" build configuration. See details on files below.
 What the test application does, is parse the input files, and does a _very basic_ "summary": how many meshes, lights, cameras,
 bones are present, and the total sum of mesh vertices and faces. Nothing related to animations is tested.
+
+Ryzen 5950X (Windows 10, Visual Studio 2022 v17.13.1):
 
 | Parser                   | Time sequential, s | Time parallel, s | Executable size, KB |
 |--------------------------|------:|-------:|-----:|
@@ -27,6 +27,17 @@ bones are present, and the total sum of mesh vertices and faces. Nothing related
 | FBX SDK                  | 869.9 | crash! | 4508 |
 | AssImp                   |  33.9 |   26.7 | 1060 |
 | OpenFBX                  |  26.7 |   15.8 |  312 |
+
+Apple M4 Max (macOS 15.4, Xcode 16.1):
+
+| Parser                   | Time sequential, s | Time parallel, s | Executable size, KB |
+|--------------------------|------:|-------:|-----:|
+| ufbx                     |   6.8 |    2.0 |  362 |
+| ufbx w/ internal threads |   2.6 |    1.7 |  364 |
+| FBX SDK                  | 159.2 | crash! | 7228 |
+| AssImp                   |  18.2 |    4.8 | 1036 |
+| OpenFBX                  |  19.3 |    9.4 |  264 |
+
 
 Files being tested (not in the repo, but I've [uploaded them here](https://aras-p.info/files/blender/fbx_data/test_fbx_parsers/)): 
 - Caldera:  388MB file exported out of [Activision Caldera](https://github.com/Activision/caldera) USD data set.
@@ -54,8 +65,9 @@ random crashes deep from the innards of the SDK. Probably has some actually shar
 
 ### Notes
 
-I have only built and tested this code on Windows, with Visual Studio 2022. Just do "Open with Visual Studio" on the folder; it goes into regular CMake
-project mode.
+I have only built and tested this code on:
+- Windows (Visual Studio 2022). Just do "Open with Visual Studio" on the folder; it goes into regular CMake project mode.
+- macOS (Xcode 16). Create a `build` folder, from there `cmake -G Xcode ..`, open the resulting Xcode project.
 
 #### Parallel file import
 
@@ -78,8 +90,7 @@ by pointing to job run/wait functions in `ufbx_load_opts`. In the table above, t
 #### FBX SDK location
 
 The test application expects FBX SDK headers and libraries to be located locally, under `external/fbxsdk/include` and
-`external/fbxsdk/lib/x64` (`debug` and `release` under that). I'm only testing on Windows, x64 build, and only the `-mt`
-library variants.
+`external/fbxsdk/lib`.
 
 #### Statistics computed by the test applications
 
